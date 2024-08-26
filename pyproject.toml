@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "fungani"
+version = "0.1.0"
+description = "BLAST-based program for visualizing Average Nucleotide Identity (ANI) between fungal genomes"
+authors = ["chl <chl@aliquote.org>"]
+readme = "README.md"
+package-mode = true
+
+[tool.poetry.dependencies]
+python = "^3.9.0"
+biopython = "^1.84"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
