@@ -9,7 +9,6 @@ package-mode = true
 [tool.poetry.dependencies]
 python = "^3.9.0"
 biopython = "^1.84"
-tqdm = "^4.66.5"
 
 
 [build-system]

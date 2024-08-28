@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from tqdm import tqdm
+import time
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -20,24 +20,38 @@ MAKEBLASTDB = shutil.which("makeblastdb")
 
 def run_async(func, arglist, kwds, cpus):
     pool = multiprocessing.Pool(processes=cpus)
-    jobs = [
-        pool.apply_async(
+    results = {}
+    start_time = time.time()
+    for key, value in arglist.items():
+        results[key] = pool.apply_async(
             func=func,
-            args=(list(arg),),
+            args=(list(value),),
             kwds=kwds,
         )
-        for arg in arglist
-    ]
-    pool.close()
-    result = []
-    for job in tqdm(
-        jobs,
-        total=float("inf"),
-        desc=f"Computing {len(jobs)} batch (blastn) on {cpus} cores",
-    ):
-        result.append(job.get())
 
-    return result
+    running, successful, error = [], [], []
+    current_time = time.time()
+
+    for key, result in results.items():
+        try:
+            if result.successful():
+                successful.append(key)
+            else:
+                error.append(key)
+        except ValueError:
+            running.append(key)
+
+    rate = (len(successful) + len(error)) / (current_time - start_time)
+    print("Rate:", round(rate, 3))
+    print(
+        "Estimated time to completion:",
+        time.strftime("%H:%M:%S", time.gmtime(len(running) / rate)),
+    )
+
+    pool.close()
+    pool.join()
+
+    return results
 
 
 def make_windows(pathname, args):
