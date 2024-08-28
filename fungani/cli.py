@@ -1,6 +1,8 @@
 import argparse
 import sys
 
+from fungani.core import main
+
 ARG_MAX_WIDTH = 60
 
 
@@ -39,5 +41,5 @@ def parse_args(args):
 
 
 if __name__ == "__main__":
-    parser = parse_args(sys.argv[1:])
-    pass
+    args = parse_args(sys.argv[1:])
+    main(args)

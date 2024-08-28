@@ -1,3 +1,4 @@
+import logging
 import mmap
 import multiprocessing
 import os
@@ -8,11 +9,14 @@ import subprocess
 import tempfile
 
 from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
+logger = logging.getLogger(__name__)
 BLASTN = shutil.which("blastn")
 MAKEBLASTDB = shutil.which("makeblastdb")
 
 
+# XXX no longer necessary
 def write_sequence_length(filename, pathname):
     """Write tab-delimited sequence names and sizes."""
     records = SeqIO.to_dict(SeqIO.parse(filename, "fasta"))
@@ -25,25 +29,21 @@ def write_sequence_length(filename, pathname):
     return outfile
 
 
-def prepare_queries(pathname, genome_length_file, args):
-    """Write genomic coordinates in Bed format and spliced Fasta file."""
-    # FIXME: bedtools not available for Windows
-    cmd = (
-        "bedtools makewindows -g",
-        os.path.join(pathname, genome_length_file),
-        "-w",
-        str(args.size),
-        "-s",
-        str(args.overlap),
-    )
-    outfile = os.path.join(pathname, "split.bed")
-    with open(outfile, "a") as file:
-        subprocess.call(cmd, stdout=file)
-
-    cmd = ("bedtools getfasta -fi", args.test, "-bed", outfile)
+def make_windows(pathname, args):
+    splices = []
+    idx = 0
     outfile = os.path.join(pathname, f"{args.test}_split.fas")
-    with open(outfile, "a") as file:
-        subprocess.call(cmd, stdout=file)
+    records = SeqIO.to_dict(SeqIO.parse(args.test, "fasta"))
+
+    for key in records.items():
+        idx += 1
+        end = len(key[1].seq) - args.size + 1
+        for start in range(0, end, args.overlap):
+            id = ":".join((str(idx), "-".join((str(start), str(start + args.size)))))
+            seq = key[1].seq[start : start + args.size]
+            splices.append(SeqRecord(seq, id=id, description=""))
+
+    SeqIO.write(splices, outfile, "fasta")
 
     return outfile
 
@@ -109,6 +109,7 @@ def make_blast_db(filename):
 
 
 def main(args):
+    logger.info("creating temporary directories")
     if args.outdir is None:
         temp_dir = tempfile.TemporaryDirectory()
         fs_tmp = temp_dir.name
@@ -119,14 +120,11 @@ def main(args):
     fs_ani_blast = os.path.join(fs_tmp, "ani_tmp")
     os.makedirs(fs_ani_blast)
 
-    print("DEBUG: writing Blast db")
+    logger.info("writing Blast db")
     reference_db = make_blast_db(args.reference)
 
-    print("DEBUG: splitting genome")
-    fsizes = write_sequence_length(args.reference, fs_tmp)
-
-    print("DEBUG: preparing sliced genome")
-    fsplit = prepare_queries(fs_tmp, fsizes, args)
+    logger.info("preparing sliced genome")
+    fsplit = make_windows(fs_tmp, args)
 
     records = list(SeqIO.parse(fsplit, "fasta"))
     nsample = int(len(records) * args.percent / 100)
@@ -135,7 +133,7 @@ def main(args):
     data = chunks(records, nc)
     p = multiprocessing.Pool(processes=args.cpus)
 
-    print("DEBUG: running Blast")
+    logger.info("running Blast")
     result = [
         p.apply_async(
             blast,
@@ -146,7 +144,7 @@ def main(args):
     ]
     result = [item.get() for item in result]
 
-    print("DEBUG: parsing Blast")
+    logger.info("parsing Blast")
     out, index = parse_results(fs_ani_blast)
     outfile = os.path.join(os.path.expanduser("~"), "ani_identities.txt")
     file = open(outfile, "w")
@@ -159,5 +157,5 @@ def main(args):
         file.write(str(i) + "\n")
     file.close()
 
-    if temp_dir:  # type: ignore (possibly unbound variable)
-        temp_dir.cleanup()
+    logger.info("deleting temporary directories")
+    os.rmdir(fs_tmp)
