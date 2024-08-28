@@ -36,6 +36,9 @@ def parse_args(args):
     parser.add_argument(
         "-o", "--output", dest="outdir", type=str, help="Output directory"
     )
+    parser.add_argument(
+        "-c", "--clean", action="store_true", help="Clean intermediate files"
+    )
 
     return parser.parse_args(args)
 

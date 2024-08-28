@@ -6,7 +6,9 @@ import random
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
+from tqdm import tqdm
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -16,23 +18,34 @@ BLASTN = shutil.which("blastn")
 MAKEBLASTDB = shutil.which("makeblastdb")
 
 
-# XXX no longer necessary
-def write_sequence_length(filename, pathname):
-    """Write tab-delimited sequence names and sizes."""
-    records = SeqIO.to_dict(SeqIO.parse(filename, "fasta"))
+def run_async(func, arglist, kwds, cpus):
+    pool = multiprocessing.Pool(processes=cpus)
+    jobs = [
+        pool.apply_async(
+            func=func,
+            args=(list(arg),),
+            kwds=kwds,
+        )
+        for arg in arglist
+    ]
+    pool.close()
+    result = []
+    for job in tqdm(
+        jobs,
+        total=float("inf"),
+        desc=f"Computing {len(jobs)} batch (blastn) on {cpus} cores",
+    ):
+        result.append(job.get())
 
-    outfile = f"{filename}.sizes"
-    with open(os.path.join(pathname, outfile), "w") as file:
-        for key in records.items():
-            file.write("\t".join([key[0], str(len(key[1].seq))]) + "\n")
-
-    return outfile
+    return result
 
 
 def make_windows(pathname, args):
     splices = []
     idx = 0
-    outfile = os.path.join(pathname, f"{args.test}_split.fas")
+    outfile = os.path.join(
+        pathname, f"{os.path.splitext(os.path.basename(args.test))[0]}_split.fas"
+    )
     records = SeqIO.to_dict(SeqIO.parse(args.test, "fasta"))
 
     for key in records.items():
@@ -58,7 +71,7 @@ def chunks(lst, n):
 def blast(record, blast_dir, query_dir, db):
     for r in record:
         key = str(r.id)
-        query = query_dir + key + ".fasta"
+        query = os.path.join(query_dir, key + ".fasta")
         SeqIO.write(r, query, "fasta")
         cmd = (
             str(BLASTN),
@@ -73,16 +86,16 @@ def blast(record, blast_dir, query_dir, db):
             "-max_target_seqs",
             "1",
         )
-        subprocess.run(cmd)
+        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-def parse_results(dir):
+def parse_results(pathname):
     """Read % identity from Blast result files."""
     out, index = [], []
 
-    for f in sorted(os.listdir(path=dir)):
+    for f in sorted(os.listdir(path=pathname)):
         index.append(f)
-        curr = os.path.join(dir, f)
+        curr = os.path.join(pathname, f)
         with open(curr, "r+") as ff:
             if os.stat(curr).st_size == 0:
                 print(curr, "is empty")
@@ -99,16 +112,19 @@ def parse_results(dir):
     return out, index
 
 
-def make_blast_db(filename):
+def make_blast_db(pathname, filename):
     """Generate Blast database."""
-    outfile = os.path.splitext(filename)[0] + "-db"
+    outfile = os.path.join(
+        pathname, os.path.splitext(os.path.basename(filename))[0] + "-db"
+    )
     cmd = (str(MAKEBLASTDB), "-dbtype", "nucl", "-in", filename, "-out", outfile)
-    subprocess.run(cmd)
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     return outfile
 
 
 def main(args):
+    logging.basicConfig(filename="fungani.log", level=logging.INFO)
     logger.info("creating temporary directories")
     if args.outdir is None:
         temp_dir = tempfile.TemporaryDirectory()
@@ -117,11 +133,11 @@ def main(args):
         fs_tmp = args.outdir
     fs_ani_queries = os.path.join(fs_tmp, "ani_q")
     os.makedirs(fs_ani_queries)
-    fs_ani_blast = os.path.join(fs_tmp, "ani_tmp")
-    os.makedirs(fs_ani_blast)
+    fs_ani_blasts = os.path.join(fs_tmp, "ani_b")
+    os.makedirs(fs_ani_blasts)
 
     logger.info("writing Blast db")
-    reference_db = make_blast_db(args.reference)
+    reference_db = make_blast_db(fs_tmp, args.reference)
 
     logger.info("preparing sliced genome")
     fsplit = make_windows(fs_tmp, args)
@@ -134,18 +150,15 @@ def main(args):
     p = multiprocessing.Pool(processes=args.cpus)
 
     logger.info("running Blast")
-    result = [
-        p.apply_async(
-            blast,
-            args=(list(x),),
-            kwds={"query_dir": fs_ani_queries, "db": reference_db},
-        )
-        for x in data
-    ]
-    result = [item.get() for item in result]
+    result = run_async(
+        blast,
+        data,
+        {"blast_dir": fs_ani_blasts, "query_dir": fs_ani_queries, "db": reference_db},
+        args.cpus,
+    )
 
     logger.info("parsing Blast")
-    out, index = parse_results(fs_ani_blast)
+    out, index = parse_results(fs_ani_blasts)
     outfile = os.path.join(os.path.expanduser("~"), "ani_identities.txt")
     file = open(outfile, "w")
     for o in out:
@@ -157,5 +170,6 @@ def main(args):
         file.write(str(i) + "\n")
     file.close()
 
-    logger.info("deleting temporary directories")
-    os.rmdir(fs_tmp)
+    if args.clean:
+        logger.info("deleting temporary directories")
+        shutil.rmtree(fs_tmp)
