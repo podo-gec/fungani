@@ -58,7 +58,7 @@ def make_windows(pathname, args):
 
     SeqIO.write(splices, outfile, "fasta")
 
-    return outfile
+    return outfile, len(splices)
 
 
 def chunks(lst, n):
@@ -124,23 +124,36 @@ def make_blast_db(pathname, filename):
 
 
 def main(args):
-    logging.basicConfig(filename="fungani.log", level=logging.INFO)
-    logger.info("creating temporary directories")
+    logging.basicConfig(
+        filename=os.path.join(os.path.expanduser("~"), "fungani.log"),
+        level=logging.INFO,
+    )
+    logger.info("Creating temporary directories")
     if args.outdir is None:
         temp_dir = tempfile.TemporaryDirectory()
         fs_tmp = temp_dir.name
     else:
+        if os.path.isdir(args.outdir):
+            if not os.listdir(args.outdir):
+                sys.exit(f"Directory {args.outdir} is not empty")
         fs_tmp = args.outdir
     fs_ani_queries = os.path.join(fs_tmp, "ani_q")
     os.makedirs(fs_ani_queries)
     fs_ani_blasts = os.path.join(fs_tmp, "ani_b")
     os.makedirs(fs_ani_blasts)
 
+    if args.cpus > multiprocessing.cpu_count() - 1:
+        args.cpus = multiprocessing.cpu_count() - 1
+
+    if 0 < args.percent <= 1:
+        args.percent *= 100
+
     logger.info("writing Blast db")
     reference_db = make_blast_db(fs_tmp, args.reference)
 
-    logger.info("preparing sliced genome")
-    fsplit = make_windows(fs_tmp, args)
+    logger.info("Preparing sliced genome")
+    fsplit, count = make_windows(fs_tmp, args)
+    logger.info(f">>> {count} sequences in spliced genome")
 
     records = list(SeqIO.parse(fsplit, "fasta"))
     nsample = int(len(records) * args.percent / 100)
@@ -149,16 +162,18 @@ def main(args):
     data = chunks(records, nc)
     p = multiprocessing.Pool(processes=args.cpus)
 
-    logger.info("running Blast")
+    logger.info("Running Blast")
     result = run_async(
         blast,
         data,
         {"blast_dir": fs_ani_blasts, "query_dir": fs_ani_queries, "db": reference_db},
         args.cpus,
     )
+    logger.info(f">>> {len(result)} jobs terminated successfully")
 
-    logger.info("parsing Blast")
+    logger.info("Parsing Blast")
     out, index = parse_results(fs_ani_blasts)
+    logger.info(f">>> {len(out)} Blast results analysed")
     outfile = os.path.join(os.path.expanduser("~"), "ani_identities.txt")
     file = open(outfile, "w")
     for o in out:
@@ -169,7 +184,9 @@ def main(args):
     for i in index:
         file.write(str(i) + "\n")
     file.close()
+    logger.info(">>> results saved in user home directory")
 
     if args.clean:
-        logger.info("deleting temporary directories")
+        logger.info("Deleting temporary directories")
         shutil.rmtree(fs_tmp)
+        logger.info(f">>> {fs_tmp} deleted successfully")
