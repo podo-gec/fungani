@@ -1,6 +1,6 @@
 # FungANI
 
-A BLAST-based program for visualizing Average Nucleotide Identity (ANI) between
+A BLAST-based program for analyzing Average Nucleotide Identity (ANI) between
 two fungal genomes, enables easy fungal species delimitation.
 
 ## Getting Started
@@ -76,4 +76,4 @@ issue and provide a bug report.
 
 ## License
 
-MIT
+BSD-3
