@@ -1,4 +1,5 @@
 import argparse
+import time
 import sys
 
 from fungani.core import main
@@ -45,4 +46,11 @@ def parse_args(args):
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
+    tic = time.time()
+    # forward mode: test -> reference
+    args.mode = "fwd"
     main(args)
+    # reverse mode: reference -> test
+    args.mode = "rev"
+    args.test, args.reference = args.reference, args.test
+    main(args, tic)

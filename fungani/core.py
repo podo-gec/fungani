@@ -1,3 +1,4 @@
+import csv
 import logging
 import mmap
 import multiprocessing
@@ -9,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import datetime
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -20,36 +22,20 @@ MAKEBLASTDB = shutil.which("makeblastdb")
 
 def run_async(func, arglist, kwds, cpus):
     pool = multiprocessing.Pool(processes=cpus)
-    results = {}
-    start_time = time.time()
-    for key, value in arglist.items():
-        results[key] = pool.apply_async(
+    jobs = [
+        pool.apply_async(
             func=func,
-            args=(list(value),),
+            args=(list(arg),),
             kwds=kwds,
         )
-
-    running, successful, error = [], [], []
-    current_time = time.time()
-
-    for key, result in results.items():
-        try:
-            if result.successful():
-                successful.append(key)
-            else:
-                error.append(key)
-        except ValueError:
-            running.append(key)
-
-    rate = (len(successful) + len(error)) / (current_time - start_time)
-    print("Rate:", round(rate, 3))
-    print(
-        "Estimated time to completion:",
-        time.strftime("%H:%M:%S", time.gmtime(len(running) / rate)),
-    )
+        for arg in arglist
+    ]
 
     pool.close()
-    pool.join()
+    # pool.join()
+    results = []
+    for job in jobs:
+        results.append(job.get())
 
     return results
 
@@ -137,18 +123,24 @@ def make_blast_db(pathname, filename):
     return outfile
 
 
-def main(args):
+def main(args, start_time=None):
     logging.basicConfig(
         filename=os.path.join(os.path.expanduser("~"), "fungani.log"),
         level=logging.INFO,
+        filemode="w+" if args.mode == "fwd" else "w",
     )
+
+    if args.mode == "fwd":
+        logger.info("========== Starting new process ==========")
+    logger.info(f"==========       mode: {args.mode}      ==========")
+
     logger.info("Creating temporary directories")
     if args.outdir is None:
         temp_dir = tempfile.TemporaryDirectory()
         fs_tmp = temp_dir.name
     else:
         if os.path.isdir(args.outdir):
-            if not os.listdir(args.outdir):
+            if os.listdir(args.outdir):
                 sys.exit(f"Directory {args.outdir} is not empty")
         fs_tmp = args.outdir
     fs_ani_queries = os.path.join(fs_tmp, "ani_q")
@@ -156,13 +148,18 @@ def main(args):
     fs_ani_blasts = os.path.join(fs_tmp, "ani_b")
     os.makedirs(fs_ani_blasts)
 
+    if args.size <= 15:
+        sys.exit(f"Window size {args.size} too small")
+
     if args.cpus > multiprocessing.cpu_count() - 1:
         args.cpus = multiprocessing.cpu_count() - 1
+        logger.warn(f"No. cores too large, now {args.cpus}")
 
     if 0 < args.percent <= 1:
         args.percent *= 100
+        logger.warn(f"Genome sampling < 1, now {args.percent}")
 
-    logger.info("writing Blast db")
+    logger.info("Writing Blast database")
     reference_db = make_blast_db(fs_tmp, args.reference)
 
     logger.info("Preparing sliced genome")
@@ -188,19 +185,26 @@ def main(args):
     logger.info("Parsing Blast")
     out, index = parse_results(fs_ani_blasts)
     logger.info(f">>> {len(out)} Blast results analysed")
-    outfile = os.path.join(os.path.expanduser("~"), "ani_identities.txt")
-    file = open(outfile, "w")
-    for o in out:
-        file.write(str(o) + "\n")
-    file.close()
-    outfile = os.path.join(os.path.expanduser("~"), "ani_coordinates.txt")
-    file = open(outfile, "w")
-    for i in index:
-        file.write(str(i) + "\n")
-    file.close()
+    outfile = os.path.join(os.path.expanduser("~"), f"fungani_{args.mode}.csv")
+    rows = zip(index, out)
+    with open(outfile, "w") as f:
+        writer = csv.writer(f)
+        for row in rows:
+            writer.writerow(row)
     logger.info(">>> results saved in user home directory")
 
     if args.clean:
         logger.info("Deleting temporary directories")
         shutil.rmtree(fs_tmp)
-        logger.info(f">>> {fs_tmp} deleted successfully")
+        logger.info(f">>> '{fs_tmp}' deleted successfully")
+
+    if args.mode == "rev":
+        logger.info("=========== Process completed ============")
+        if start_time is not None:
+            toc = time.time()
+            elapsed_time = datetime.strftime(
+                datetime.utcfromtimestamp(toc - start_time), "%H:%M:%S"
+            )
+            logger.info(f"Elapsed time: {elapsed_time}")
+            ## Simulate a success return value for the Tk app
+            return True
