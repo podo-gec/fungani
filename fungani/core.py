@@ -17,6 +17,7 @@ import fastaparser
 logger = logging.getLogger(__name__)
 BLASTN = shutil.which("blastn")
 MAKEBLASTDB = shutil.which("makeblastdb")
+HAVE_R = shutil.which("R")
 
 
 def deserialize_fasta(sequences):
@@ -221,5 +222,21 @@ def main(args, start_time=None):
                 "%H:%M:%S",
             )
             logger.info(f"Elapsed time: {elapsed_time}")
+
+            if HAVE_R:
+                file_fwd = os.path.join(os.path.expanduser("~"), "fungani_fwd.csv")
+                file_rev = os.path.join(os.path.expanduser("~"), "fungani_rev.csv")
+                file_plot = os.path.join(os.path.expanduser("~"), "fungani.pdf")
+                file_rscript = os.path.join(
+                    os.path.abspath(os.path.dirname(__file__)), "plot.r"
+                )
+
+                cmd = ("Rscript", file_rscript, file_fwd, file_rev)
+                out = subprocess.run(
+                    cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                if out.returncode == 0:
+                    logger.info(f"R graphical output saved as: {file_plot}")
+
             # Simulate a success return value for the Tk app
             return True
