@@ -118,24 +118,32 @@ option, since including, e.g., [plotnine] would increase the binary size by
 quite a large amount of Mb.
 
 A more efficient command-line only version of this app, with memory-cached
-operations for Linux and macOS users, will be available in a separate branch
-soon.
+operations for Linux and macOS users, will be available in a separate branch.
+
+It should be noted, however, thta with the present version of the application,
+it is possible to post-process the Blast results when the intermediate files are
+kept (option `-c` or `--clean`). Two applications are possible with this setup:
+(1) zero-hit regions can be analyzed individually, to highlight genomic
+landscapr specific to each genomes; (2) using a window large enough to cover the
+full sequence (e.g., with a databank of ITS) will result in a 'multi-blast'
+setting whereby each sequence is blasted against a reference genome (in the
+forward mode only).
 
 Some benchmarks are shown below:
 
 |  Processor                              | OS                   | No. cores (`-j`) | Time (HH:MM:SS)   |
 | --------------------------------------- | -------------------- | ---------------- | ----------------- |
 | Intel i7-10610U (8) @ 4.900GHz          | Ubuntu 24.04 LTS     | 4                | 00:32:32          |
-| Intel Xeon E5-2630 v3 (32) @ 3.200GHz   | Ubuntu 20.04.6 LTS   | 20               | 00:49:01          |
 | Intel Xeon Gold 6240R (96) @ 4.000GHz   | Ubuntu 22.04.4 LTS   | 20               | 00:12:36          |
 | Intel Xeon Gold 6240R (96) @ 4.000GHz   | Ubuntu 22.04.4 LTS   | 40               | 00:08:02          |
-| --------------------------------------- | -------------------- | ---------------- | ----------------- |
 
-In all but the first two cases, CPU governor was set to "performance".
+In all cases CPU governor was set to "performance". Running in quick-mode (10%
+of the genome) results in increased performance, especially on laptop (Intel
+i7-10610U = 00:05:19 instead of 00:32:32).
 
-Results from a [sample session] are available. Computations were performed on
-the full genomes of _Neurospora crassa OR74A_ and _Neurospora africana FGSC 1740_,
-available publicly on the NCBI databank.
+Results from a [sample session] (whole genome and 10% sampling) are available.
+Computations were performed on the genomes of _Neurospora crassa OR74A_ and
+_Neurospora africana FGSC 1740_, available publicly on the NCBI databank.
 
 [bedtools]: https://bedtools.readthedocs.io/en/latest/index.html
 [biopython]: https://biopython.org/
