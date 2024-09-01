@@ -9,8 +9,6 @@ INFO:fungani.core:>>> 5 jobs terminated successfully
 INFO:fungani.core:Parsing Blast
 INFO:fungani.core:>>> 69702 Blast results analysed
 INFO:fungani.core:>>> results saved in user home directory
-INFO:fungani.core:Deleting temporary directories
-INFO:fungani.core:>>> 'tmp' deleted successfully
 INFO:fungani.core:==========       mode: rev      ==========
 INFO:fungani.core:Creating temporary directories
 INFO:fungani.core:Writing Blast database
@@ -21,8 +19,6 @@ INFO:fungani.core:>>> 5 jobs terminated successfully
 INFO:fungani.core:Parsing Blast
 INFO:fungani.core:>>> 83378 Blast results analysed
 INFO:fungani.core:>>> results saved in user home directory
-INFO:fungani.core:Deleting temporary directories
-INFO:fungani.core:>>> 'tmp' deleted successfully
 INFO:fungani.core:=========== Process completed ============
-INFO:fungani.core:Elapsed time: 00:32:32
+INFO:fungani.core:Elapsed time: 00:29:22
 INFO:fungani.core:R graphical output saved as: /home/chl/fungani.pdf
