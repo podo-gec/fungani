@@ -26,15 +26,18 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
-name = "fastaparser"
-version = "1.1.1"
-description = "A Python FASTA file Parser and Writer."
+name = "fqfa"
+version = "1.3.1"
+description = "A lightweight Python library for handling FASTQ and FASTA files."
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 files = [
-    {file = "fastaparser-1.1.1-py3-none-any.whl", hash = "sha256:c929f712bd4ea3e6f3569761c6c4fbe798e9a1c4b04d322deb05c8922e731cd4"},
-    {file = "fastaparser-1.1.1.tar.gz", hash = "sha256:55adcc43285cac07a39844de2bbc5a0b9a40eb35fa99a44b62abe19917cd778e"},
+    {file = "fqfa-1.3.1-py3-none-any.whl", hash = "sha256:9a043ad4cdfbd3466dc4660a525f7e68bff968686fc83f2461911229c483346b"},
+    {file = "fqfa-1.3.1.tar.gz", hash = "sha256:4624d4595cbefa0c3c0308c307bb123d621837e53768370ba48db5c20dc03cc9"},
 ]
+
+[package.extras]
+dev = ["black", "flake8", "flake8-pyproject", "mypy", "pre-commit", "pytest"]
 
 [[package]]
 name = "iniconfig"
@@ -109,4 +112,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9.0"
-content-hash = "4e09c1d48bd44ad231a949b1449cc87da4741896fc9eed4ed63ff0da5814e278"
+content-hash = "b9bb329b344a270e1a1e8772ae669601d789f4f9438c8f8207ef446609fb77c5"

@@ -12,19 +12,12 @@ import sys
 import tempfile
 import time
 
-import fastaparser
+from fqfa.fasta import fasta
 
 logger = logging.getLogger(__name__)
 BLASTN = shutil.which("blastn")
 MAKEBLASTDB = shutil.which("makeblastdb")
 HAVE_R = shutil.which("R")
-
-
-def deserialize_fasta(sequences):
-    records = []
-    for seq in sequences:
-        records.append([seq.sequence, seq.header.strip(">")])
-    return records
 
 
 def run_async(func, arglist, kwds, cpus):
@@ -48,29 +41,28 @@ def run_async(func, arglist, kwds, cpus):
 
 
 def make_windows(pathname, args):
-    splices = []
+    slices = {}
     idx = 0
     outfile = os.path.join(
         pathname, f"{os.path.splitext(os.path.basename(args.test))[0]}_split.fas"
     )
 
     with open(args.test, "r") as file:
-        records = list(fastaparser.Reader(file, parse_method="quick"))
+        records = list(fasta.parse_fasta_records(file))
 
     for record in records:
         idx += 1
-        end = len(record.sequence) - args.size + 1
+        end = len(record[1]) - args.size + 1
         for start in range(0, end, args.overlap):
             id = ":".join((str(idx), "-".join((str(start), str(start + args.size)))))
-            seq = record.sequence[start : start + args.size]
-            splices.append(fastaparser.FastaSequence(seq, id))
+            seq = record[1][start : start + args.size]
+            slices[id] = seq
 
     with open(outfile, "w") as file:
-        writer = fastaparser.Writer(file)
-        for splice in splices:
-            writer.writefasta(splice)
+        for key, value in slices.items():
+            fasta.write_fasta_record(file, key, value)
 
-    return outfile, len(splices)
+    return outfile, len(slices)
 
 
 def chunks(lst, n):
@@ -82,11 +74,12 @@ def chunks(lst, n):
 
 def blast(record, blast_dir, query_dir, db):
     for r in record:
-        key = str(r[1])
+        key = str(r[0])
         query = os.path.join(query_dir, key + ".fasta")
+        # XXX
         with open(query, "w") as file:
-            writer = fastaparser.Writer(file)
-            writer.writefasta(fastaparser.FastaSequence(r[0], r[1]))
+            fasta.write_fasta_record(file, r[0], r[1])
+
         cmd = (
             str(BLASTN),
             "-out",
@@ -149,18 +142,27 @@ def main(args, start_time=None):
     logger.info(f"==========       mode: {args.mode}      ==========")
 
     logger.info("Creating temporary directories")
+    # XXX switch to os.path.join(os.sep, ...) for Windows and maybe check rootdir
+    # https://stackoverflow.com/a/51276165
     if args.outdir is None:
         temp_dir = tempfile.TemporaryDirectory()
         fs_tmp = temp_dir.name
     else:
-        if os.path.isdir(args.outdir):
-            if os.listdir(args.outdir):
-                sys.exit(f"Directory {args.outdir} is not empty")
+        if args.mode == "fwd":
+            if os.path.isdir(args.outdir):
+                if os.listdir(args.outdir):
+                    sys.exit(f"Directory {args.outdir} is not empty")
         fs_tmp = args.outdir
-    fs_ani_queries = os.path.join(fs_tmp, "ani_q")
-    os.makedirs(fs_ani_queries)
-    fs_ani_blasts = os.path.join(fs_tmp, "ani_b")
-    os.makedirs(fs_ani_blasts)
+    if not args.clean:
+        fs_ani_queries = os.path.join(fs_tmp, args.mode, "ani_q")
+        os.makedirs(fs_ani_queries)
+        fs_ani_blasts = os.path.join(fs_tmp, args.mode, "ani_b")
+        os.makedirs(fs_ani_blasts)
+    else:
+        fs_ani_queries = os.path.join(fs_tmp, "ani_q")
+        os.makedirs(fs_ani_queries)
+        fs_ani_blasts = os.path.join(fs_tmp, "ani_b")
+        os.makedirs(fs_ani_blasts)
 
     if args.size <= 15:
         sys.exit(f"Window size {args.size} too small")
@@ -181,8 +183,7 @@ def main(args, start_time=None):
     logger.info(f">>> {count} sequences in spliced genome")
 
     with open(fsplit, "r") as file:
-        records = list(fastaparser.Reader(file, parse_method="quick"))
-    records = deserialize_fasta(records)
+        records = list(fasta.parse_fasta_records(file))
     nsample = int(len(records) * args.percent / 100)
     records = random.sample(records, nsample)
     nc = int(len(records) / args.cpus)
