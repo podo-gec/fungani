@@ -219,7 +219,7 @@ def main(args, start_time=None):
         if start_time is not None:
             toc = time.time()
             elapsed_time = datetime.datetime.strftime(
-                datetime.datetime.fromtimestamp(toc - start_time, datetime.UTC),
+                datetime.datetime.utcfromtimestamp(toc - start_time),
                 "%H:%M:%S",
             )
             logger.info(f"Elapsed time: {elapsed_time}")
