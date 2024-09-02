@@ -18,11 +18,19 @@ def parse_args(args):
     parser.add_argument("reference", type=str, help="Reference genome")
     parser.add_argument("test", type=str, help="Test genome")
     parser.add_argument(
+        "-t",
+        "--threshold",
+        dest="threshold",
+        type=int,
+        default=80,
+        help="ANI threshold",
+    )
+    parser.add_argument(
         "-p",
         "--percent",
         dest="percent",
         type=int,
-        default=100,
+        default=10,
         help="Genome sample size",
     )
     parser.add_argument(

@@ -181,7 +181,7 @@ p4 <- ggplot(data = dd0_agg, aes(x = groups, y = V3)) +
     plot.margin = unit(c(0, 0, 0, 0), "mm")
   )
 
-(p1 + p2) / plot_spacer() / p3 / p4 +
+pp <- (p1 + p2) / plot_spacer() / p3 / p4 +
   plot_layout(heights = c(8, 0.5, 0.8, 0.8)) +
   plot_annotation(
     paste0(
@@ -194,4 +194,4 @@ p4 <- ggplot(data = dd0_agg, aes(x = groups, y = V3)) +
     ))
   )
 
-ggsave(outfile, width = 12, height = 14)
+ggsave(outfile, pp, width = 12, height = 14)

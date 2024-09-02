@@ -4,6 +4,7 @@ import logging
 import mmap
 import multiprocessing
 import os
+import platform
 import random
 import re
 import shutil
@@ -18,6 +19,15 @@ logger = logging.getLogger(__name__)
 BLASTN = shutil.which("blastn")
 MAKEBLASTDB = shutil.which("makeblastdb")
 HAVE_R = shutil.which("R")
+
+
+def universal_open(filepath):
+    if platform.system() == "Darwin":
+        subprocess.call(("open", filepath))
+    elif platform.system() == "Windows":
+        os.startfile(filepath)
+    else:
+        subprocess.call(("xdg-open", filepath))
 
 
 def run_async(func, arglist, kwds, cpus):
@@ -238,6 +248,7 @@ def main(args, start_time=None):
                 )
                 if out.returncode == 0:
                     logger.info(f"R graphical output saved as: {file_plot}")
+                    universal_open(file_plot)
 
             # Simulate a success return value for the Tk app
             return True
