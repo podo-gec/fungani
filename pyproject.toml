@@ -1,15 +1,20 @@
 [tool.poetry]
-name = "fungani"
-version = "0.1.0"
-description = "BLAST-based program for visualizing Average Nucleotide Identity (ANI) between fungal genomes"
 authors = ["chl <chl@aliquote.org>"]
-readme = "README.md"
+description = "BLAST-based program for analyzing Average Nucleotide Identity (ANI) between fungal genomes"
+license = "BSD-3"
+name = "fungani"
+keywords = ["bioinformatics", "blast"]
 package-mode = true
+packages = [{include = "fungani"}]
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.scripts]
+cli_tool_name = 'fungani.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.9.0"
 fqfa = "^1.3.1"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
