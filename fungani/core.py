@@ -143,6 +143,7 @@ def make_blast_db(pathname, filename):
 def main(args, start_time=None):
     logging.basicConfig(
         filename=os.path.join(os.path.expanduser("~"), "fungani.log"),
+        format="%(asctime)s %(message)s",
         level=logging.INFO,
         filemode="w+" if args.mode == "fwd" else "w",
     )
