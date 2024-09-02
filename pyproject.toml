@@ -9,8 +9,8 @@ packages = [{include = "fungani"}]
 readme = "README.md"
 version = "0.1.0"
 
-[tool.poetry.scripts]
-cli_tool_name = 'fungani.__main__:main'
+[tool.poetry-pyinstaller-plugin.scripts]
+fungani = { source = "fungani/__main__.py", type = "onefile", bundle = false }
 
 [tool.poetry.dependencies]
 python = "^3.9.0"
