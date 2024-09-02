@@ -12,7 +12,7 @@ FONT_SIZE = 12
 
 app = tk.Tk()
 app.title("FungANI")
-app.geometry("480x440")
+app.geometry("480x460")
 default_font = font.nametofont("TkDefaultFont")
 default_font.configure(size=FONT_SIZE)
 label_default_font = font.Font(size=FONT_SIZE)
@@ -25,13 +25,17 @@ state["outdir"] = None
 def handle_click(event):
     args = collect_values()
     tic = time.time()
-    # forward mode: test -> reference
-    args.mode = "fwd"
-    main(args)
-    # reverse mode: reference -> test
-    args.mode = "rev"
-    args.test, args.reference = args.reference, args.test
-    success = main(args, tic)
+    if args.onepass:
+        args.mode = "fwd"
+        success = main(args, tic)
+    else:
+        # forward mode: test -> reference
+        args.mode = "fwd"
+        main(args)
+        # reverse mode: reference -> test
+        args.mode = "rev"
+        args.test, args.reference = args.reference, args.test
+        success = main(args, tic)
     if success:
         value_run.set("Done")
 
@@ -46,6 +50,7 @@ def collect_values():
         size=int(edit_size.get()),
         overlap=int(edit_overlap.get()),
         cpus=int(edit_cpus.get()),
+        onepass="selected" in checkbox_onepass.state(),
         clean="selected" in checkbox_clean.state(),
     )
     args = SimpleNamespace(**values)
@@ -102,7 +107,7 @@ edit_threshold = ttk.Entry(
 value_threshold.set(80)
 edit_threshold.grid(row=2, column=1)
 
-label_percent = ttk.Label(app, text="Genome size (%)", anchor="e", width=20)
+label_percent = ttk.Label(app, text="Genome fraction (%)", anchor="e", width=20)
 label_percent.grid(row=3, column=0, pady=10)
 value_percent = tk.IntVar()
 edit_percent = ttk.Entry(
@@ -150,14 +155,20 @@ edit_outdir = ttk.Entry(
 )
 edit_outdir.grid(row=7, column=2)
 
+label_onepass = ttk.Label(app, text="Only in one direction only", anchor="e", width=20)
+label_onepass.grid(row=8, column=0, padx=10)
+value_onepass = tk.IntVar()
+checkbox_onepass = ttk.Checkbutton(app, variable=value_onepass)
+checkbox_onepass.grid(row=8, column=1)
+
 label_clean = ttk.Label(app, text="Clean intermediate files", anchor="e", width=20)
-label_clean.grid(row=8, column=0, padx=10)
+label_clean.grid(row=9, column=0, padx=10)
 value_clean = tk.IntVar()
 checkbox_clean = ttk.Checkbutton(app, variable=value_clean)
-checkbox_clean.grid(row=8, column=1)
+checkbox_clean.grid(row=9, column=1)
 
 button_run = ttk.Button(app, text="Run", command=collect_values)
-button_run.grid(row=9, column=0, pady=30)
+button_run.grid(row=10, column=0, pady=30)
 value_run = tk.StringVar()
 edit_run = ttk.Entry(
     app,
@@ -166,14 +177,14 @@ edit_run = ttk.Entry(
     state="readonly",
     justify="center",
 )
-edit_run.grid(row=9, column=1)
+edit_run.grid(row=10, column=1)
 
 button_quit = ttk.Button(app, text="Quit", command=app.destroy)
-button_quit.grid(row=9, column=2)
+button_quit.grid(row=10, column=2)
 
 button_run.bind("<Button-1>", handle_click)
 
 [app.grid_columnconfigure(x, weight=1) for x in range(3)]
-[app.grid_rowconfigure(x, weight=1) for x in range(9)]
+[app.grid_rowconfigure(x, weight=1) for x in range(10)]
 
 app.mainloop()

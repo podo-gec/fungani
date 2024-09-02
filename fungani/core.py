@@ -182,6 +182,10 @@ def main(args, start_time=None):
         args.cpus = multiprocessing.cpu_count() - 1
         logger.warn(f"No. cores too large, now {args.cpus}")
 
+    if 0 < args.threshold <= 1:
+        args.threshold *= 100
+        logger.warn(f"ANI threshold < 1, now {args.threshold}")
+
     if 0 < args.percent <= 1:
         args.percent *= 100
         logger.warn(f"Genome sampling < 1, now {args.percent}")
@@ -225,7 +229,7 @@ def main(args, start_time=None):
         shutil.rmtree(fs_tmp)
         logger.info(f">>> '{fs_tmp}' deleted successfully")
 
-    if args.mode == "rev":
+    if args.mode == "rev" or args.onepass:
         logger.info("=========== Process completed ============")
         if start_time is not None:
             toc = time.time()
@@ -235,21 +239,38 @@ def main(args, start_time=None):
             )
             logger.info(f"Elapsed time: {elapsed_time}")
 
-            if HAVE_R:
-                file_fwd = os.path.join(os.path.expanduser("~"), "fungani_fwd.csv")
+    if args.mode == "rev" or args.onepass:
+        if HAVE_R:
+            file_fwd = os.path.join(os.path.expanduser("~"), "fungani_fwd.csv")
+            file_plot = os.path.join(os.path.expanduser("~"), "fungani.pdf")
+            file_rscript = os.path.join(
+                os.path.abspath(os.path.dirname(__file__)), "plot.r"
+            )
+            if args.mode == "rev":
                 file_rev = os.path.join(os.path.expanduser("~"), "fungani_rev.csv")
-                file_plot = os.path.join(os.path.expanduser("~"), "fungani.pdf")
-                file_rscript = os.path.join(
-                    os.path.abspath(os.path.dirname(__file__)), "plot.r"
+                cmd = (
+                    "Rscript",
+                    file_rscript,
+                    str(args.percent),
+                    str(args.threshold),
+                    file_fwd,
+                    file_rev,
+                )
+            if args.onepass:
+                cmd = (
+                    "Rscript",
+                    file_rscript,
+                    str(args.percent),
+                    str(args.threshold),
+                    file_fwd,
                 )
 
-                cmd = ("Rscript", file_rscript, file_fwd, file_rev)
-                out = subprocess.run(
-                    cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-                )
-                if out.returncode == 0:
-                    logger.info(f"R graphical output saved as: {file_plot}")
-                    universal_open(file_plot)
+            out = subprocess.run(
+                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            if out.returncode == 0:
+                logger.info(f"R graphical output saved as: {file_plot}")
+                universal_open(file_plot)
 
-            # Simulate a success return value for the Tk app
-            return True
+        # Simulate a success return value for the Tk app
+        return True

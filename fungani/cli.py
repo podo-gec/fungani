@@ -31,7 +31,7 @@ def parse_args(args):
         dest="percent",
         type=int,
         default=10,
-        help="Genome sample size",
+        help="Genome fraction",
     )
     parser.add_argument(
         "-w", "--size", dest="size", type=int, default=1000, help="Window size"
@@ -46,6 +46,12 @@ def parse_args(args):
         "-o", "--output", dest="outdir", type=str, help="Output directory"
     )
     parser.add_argument(
+        "-u",
+        "--onepass",
+        action="store_true",
+        help="Only in one direction only",
+    )
+    parser.add_argument(
         "-c", "--clean", action="store_true", help="Clean intermediate files"
     )
 
@@ -55,10 +61,12 @@ def parse_args(args):
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
     tic = time.time()
-    # forward mode: test -> reference
-    args.mode = "fwd"
-    main(args)
-    # reverse mode: reference -> test
-    args.mode = "rev"
-    args.test, args.reference = args.reference, args.test
-    main(args, tic)
+    if args.onepass:
+        args.mode = "fwd"
+        main(args, tic)
+    else:
+        args.mode = "fwd"
+        main(args)
+        args.mode = "rev"
+        args.test, args.reference = args.reference, args.test
+        main(args, tic)
