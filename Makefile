@@ -1,5 +1,5 @@
 .PHONY: tests
-.DEFAULT_GOAL := tests
+.DEFAULT_GOAL := run
 
 check:
 	ruff check fungani
@@ -7,8 +7,11 @@ check:
 format:
 	black fungani
 
-tests:
+test:
 	python -m pytest -vv
+
+run:
+	python -m fungani
 
 build:
 	poetry build
