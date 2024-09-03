@@ -1,5 +1,4 @@
 import csv
-import datetime
 import logging
 import mmap
 import multiprocessing
@@ -11,7 +10,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import time
 
 from fqfa.fasta import fasta
 
@@ -140,10 +138,11 @@ def make_blast_db(pathname, filename):
     return outfile
 
 
-def main(args, start_time=None):
+def main(args):
     logging.basicConfig(
         filename=os.path.join(os.path.expanduser("~"), "fungani.log"),
         format="%(asctime)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
         level=logging.INFO,
         filemode="w+" if args.mode == "fwd" else "w",
     )
@@ -231,13 +230,6 @@ def main(args, start_time=None):
 
     if args.mode == "rev" or args.onepass:
         logger.info("=========== Process completed ============")
-        if start_time is not None:
-            toc = time.time()
-            elapsed_time = datetime.datetime.strftime(
-                datetime.datetime.utcfromtimestamp(toc - start_time),
-                "%H:%M:%S",
-            )
-            logger.info(f"Elapsed time: {elapsed_time}")
 
     if args.mode == "rev" or args.onepass:
         if HAVE_R:

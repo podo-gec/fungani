@@ -1,5 +1,4 @@
 import os
-import time
 import tkinter as tk
 from tkinter import font
 import tkinter.ttk as ttk
@@ -24,10 +23,9 @@ state["outdir"] = None
 
 def handle_click(event):
     args = collect_values()
-    tic = time.time()
     if args.onepass:
         args.mode = "fwd"
-        success = main(args, tic)
+        success = main(args)
     else:
         # forward mode: test -> reference
         args.mode = "fwd"
@@ -35,7 +33,7 @@ def handle_click(event):
         # reverse mode: reference -> test
         args.mode = "rev"
         args.test, args.reference = args.reference, args.test
-        success = main(args, tic)
+        success = main(args)
     if success:
         value_run.set("Done")
 
