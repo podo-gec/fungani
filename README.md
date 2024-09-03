@@ -22,7 +22,7 @@ Standalone Blast programs can be installed on all platforms from the NCBI
 website, or with [conda] on Linux and macOS systems.
 
 To use the R backend, please ensure that the [ggplot2] and [patchwork] packages
-are installed system-wide. Alternatively, you could use [renv] or conda to
+are installed system-wide. Alternatively, you could use [renv] or [conda] to
 manage a shared virtual environment for both programs.
 
 Python packages are managed using [Poetry]. External packages will be installed
@@ -37,6 +37,7 @@ Poetry or pip install.
 [ggplot2]: https://ggplot2.tidyverse.org/
 [patchwaork]: https://patchwork.data-imaginist.com/index.html
 [renv]: https://rstudio.github.io/renv/index.html
+[conda]: https://www.anaconda.com/download/
 [Poetry]: https://python-poetry.org/
 [fqfa]: https://pypi.org/project/fqfa/
 
@@ -55,6 +56,7 @@ launching the application yourself (see below).
 Example of use:
 
     git clone https://github.com/podo-gec/fungani.git
+    cd fungani
     python -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt
@@ -70,20 +72,48 @@ next time, you will only need to activate the virtual environment.
 Assuming you are at the root of the project and the virtual environment is
 activated, simply run:
 
-    python -m fungani.cli REFERENCE TEST [-w 1000] [-g 500] [-j 20] [-c] [-o tmp]
+    python -m fungani.cli -h
+
+This should print the help message and show options with default values:
+
+    usage: fungani [-h] [-t THRESHOLD] [-p PERCENT] [-w SIZE] [-g OVERLAP] [-j CPUS] [-o OUTDIR] [-u] [-c] reference test
+
+    Compute ANI using Blast
+
+    positional arguments:
+      reference                            Reference genome
+      test                                 Test genome
+
+    options:
+      -h, --help                           show this help message and exit
+      -t THRESHOLD, --threshold THRESHOLD  ANI threshold (default: 80)
+      -p PERCENT, --percent PERCENT        Genome fraction (default: 10)
+      -w SIZE, --size SIZE                 Window size (default: 1000)
+      -g OVERLAP, --overlap OVERLAP        Window overlap (default: 500)
+      -j CPUS, --cpus CPUS                 Number of CPU cores (default: 4)
+      -o OUTDIR, --output OUTDIR           Output directory (default: None)
+      -u, --onepass                        Only in one direction only (default: False)
+      -c, --clean                          Clean intermediate files (default: False)
+
+To run the program on a REFERENCE and TEST genome, use the following command:
+
+    python -m fungani.cli REFERENCE TEST [-t 80] [-p 10] [-w 1000] [-g 500] [-j 20] [-c] [-o tmp]
 
 In the above example, `REFERENCE` and `TEST` denote the path to the Fasta file
-for the reference and test genomes. All other parameters are optional but you
-can change window size (`-w` or `--window`), overlap (`-g` or `--overlap`),
-number of cores (`-j` or `--cpus`), and output directory (`-o` or `--output`) to
-store intermediate results. All intermediate results are cleaned up when the
-application has finished its job.
+for the reference and test genomes. All other parameters are optional and can
+safely be omitted but you can change ANI threshold (`-t` or `--threshold`),
+genome fraction (`-p` or `--percent`), window size (`-w` or `--window`), overlap
+(`-g` or `--overlap`), number of cores (`-j` or `--cpus`), direction (`-u` or
+`--onepass`), cleaning of intermediate results (̀`c` or `--clean`), and output
+directory (`-o` or `--output`) to store intermediate results. All intermediate
+results are cleaned up when the application has finished its job.
 
 If everything went fine, three files are written in your user home directory,
 two CSV files that contain the % identity (on a 0-1 scale, i.e. 0.8 means 80%)
-in the forward (`fungani_fwd.csv`) or reverse (`fungani_rev.csv`) mode. The
-latter considers the `TEST` genome as the `REFERENCE` and all blasts are
-performed against the `TEST` genome itself.
+in the forward (`fungani_fwd.csv`) and reverse (`fungani_rev.csv`) direction if
+you didn't activate the `-u` or `--onepass` option. The latter considers the
+`TEST` genome as the `REFERENCE` and all blasts are performed against the `TEST`
+genome itself.
 
 Optionally, if R is installed on your OS, a graphical representation of the ANI
 distribution will be generated along raw results in your home user directory.
@@ -93,7 +123,7 @@ distribution will be generated along raw results in your home user directory.
 Assuming you are at the root of the project and the virtual environment is
 activated, simply run:
 
-    python -m fungani.app
+    python -m fungani
 
 Optionally, if R is installed on your OS, a graphical representation of the ANI
 distribution will be generated along raw results in your home user directory.
@@ -101,7 +131,7 @@ distribution will be generated along raw results in your home user directory.
 The graphical application offers the exact same set of options as the
 command-line application, see above.
 
-![app](https://github.com/podo-gec/fungani/blob/master/assets/2024-08-30-14-39-38.png)
+![app](https://github.com/podo-gec/fungani/blob/master/assets/2024-09-03-15-07-27.png)
 
 ## Performance
 
@@ -117,39 +147,39 @@ as it relies on [numpy]. Likewise, the graphical output is delegated to R as an
 option, since including, e.g., [plotnine] would increase the binary size by
 quite a large amount of Mb.
 
-It should be noted, however, thta with the present version of the application,
+It should be noted, however, that with the present version of the application,
 it is possible to post-process the Blast results when the intermediate files are
 kept (option `-c` or `--clean`). Two applications are possible with this setup:
 (1) zero-hit regions can be analyzed individually, to highlight genomic
-landscapr specific to each genomes; (2) using a window large enough to cover the
+landscape specific to each genomes; (2) using a window large enough to cover the
 full sequence (e.g., with a databank of ITS) will result in a 'multi-blast'
 setting whereby each sequence is blasted against a reference genome (in the
 forward mode only).
 
 Some benchmarks are shown below. In all cases CPU governor was set to
-"performance". Computations were performed on the genomes of _Neurospora crassa
-OR74A_ and _Neurospora africana FGSC 1740_, available publicly on the NCBI
+"performance". Computations were performed on the genomes of _Neurospora crassa_
+OR74A and _Neurospora africana_ FGSC 1740, available publicly on the NCBI
 databank.
 
 Whole-genome analysis:
 
-|  Processor                              | OS                   | No. cores  | Time (HH:MM:SS)   |
-| --------------------------------------- | -------------------- | ---------- | ----------------- |
-| Intel i7-10610U (8) @ 4.900GHz          | Ubuntu 24.04 LTS     | 4          | 00:22:32          |
-| Intel Xeon E5-2630 v3 (32) @ 3.200GHz   | Ubuntu 20.04.6 LTS   | 20         | 00:07:53          |
-| Intel Xeon E5-2630 v3 (32) @ 3.200GHz   | Ubuntu 20.04.6 LTS   | 30         | 00:07:05          |
-| Intel Xeon Gold 6240R (96) @ 4.000GHz   | Ubuntu 22.04.4 LTS   | 20         | 00:07:56          |
-| Intel Xeon Gold 6240R (96) @ 4.000GHz   | Ubuntu 22.04.4 LTS   | 40         | 00:04:01          |
+|  Processor                            | OS                 | No. cores | Time (HH:MM:SS) |
+| ------------------------------------- | ------------------ | --------- | --------------- |
+| Intel i7-10610U (8) @ 4.900GHz        | Ubuntu 24.04 LTS   | 4         | 00:22:32        |
+| Intel Xeon E5-2630 v3 (32) @ 3.200GHz | Ubuntu 20.04.6 LTS | 20        | 00:07:53        |
+| Intel Xeon E5-2630 v3 (32) @ 3.200GHz | Ubuntu 20.04.6 LTS | 30        | 00:07:05        |
+| Intel Xeon Gold 6240R (96) @ 4.000GHz | Ubuntu 22.04.4 LTS | 20        | 00:07:56        |
+| Intel Xeon Gold 6240R (96) @ 4.000GHz | Ubuntu 22.04.4 LTS | 40        | 00:04:01        |
 
 Quick mode analysis (10% genome, `-p 10`):
 
-|  Processor                              | OS                   | No. cores  | Time (HH:MM:SS)   |
-| --------------------------------------- | -------------------- | ---------- | ----------------- |
-| Intel i7-10610U (8) @ 4.900GHz          | Ubuntu 24.04 LTS     | 4          | 00:02:44          |
-| Intel Xeon E5-2630 v3 (32) @ 3.200GHz   | Ubuntu 20.04.6 LTS   | 20         | 00:01:05          |
-| Intel Xeon E5-2630 v3 (32) @ 3.200GHz   | Ubuntu 20.04.6 LTS   | 30         | 00:00:58          |
-| Intel Xeon Gold 6240R (96) @ 4.000GHz   | Ubuntu 22.04.4 LTS   | 20         | 00:01:05          |
-| Intel Xeon Gold 6240R (96) @ 4.000GHz   | Ubuntu 22.04.4 LTS   | 40         | 00:00:41          |
+|  Processor                            | OS                 | No. cores | Time (HH:MM:SS) |
+| ------------------------------------- | ------------------ | --------- | --------------- |
+| Intel i7-10610U (8) @ 4.900GHz        | Ubuntu 24.04 LTS   | 4         | 00:02:44        |
+| Intel Xeon E5-2630 v3 (32) @ 3.200GHz | Ubuntu 20.04.6 LTS | 20        | 00:01:05        |
+| Intel Xeon E5-2630 v3 (32) @ 3.200GHz | Ubuntu 20.04.6 LTS | 30        | 00:00:58        |
+| Intel Xeon Gold 6240R (96) @ 4.000GHz | Ubuntu 22.04.4 LTS | 20        | 00:01:05        |
+| Intel Xeon Gold 6240R (96) @ 4.000GHz | Ubuntu 22.04.4 LTS | 40        | 00:00:41        |
 
 Results from a [sample session] (whole genome and 10% sampling) are available.
 
@@ -171,19 +201,7 @@ dependency, you can simply run:
 
     poetry run pytest
 
-Tests can be launched individually, see below.
-
-### Sample tests
-
-Some sample Fasta files are provided in order to check that everything works
-fine.
-
-    pytest tests/test_fasta_parser.py
-    pytest tests/test_cli_parser.py
-
-### Core tests
-
-Blast and plotting capabilities are also tested using a series of tests.
+Note that tests can be launched individually.
 
 ## Contributing
 
