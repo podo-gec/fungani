@@ -62,7 +62,7 @@ def make_windows(pathname, args):
         idx += 1
         end = len(record[1]) - args.size + 1
         for start in range(0, end, args.overlap):
-            id = ":".join((str(idx), "-".join((str(start), str(start + args.size)))))
+            id = "-".join((str(idx), "-".join((str(start), str(start + args.size)))))
             seq = record[1][start : start + args.size]
             slices[id] = seq
 
@@ -84,7 +84,6 @@ def blast(record, blast_dir, query_dir, db):
     for r in record:
         key = str(r[0])
         query = os.path.join(query_dir, key + ".fasta")
-        # XXX
         with open(query, "w") as file:
             fasta.write_fasta_record(file, r[0], r[1])
 

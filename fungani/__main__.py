@@ -1,7 +1,8 @@
 import os
+import pathlib
 import tkinter as tk
-from tkinter import font
 import tkinter.ttk as ttk
+from tkinter import font
 from tkinter.filedialog import askdirectory, askopenfile
 from types import SimpleNamespace
 
@@ -57,7 +58,7 @@ def collect_values():
 
 def select_directory():
     global state
-    pathname = askdirectory()
+    pathname = pathlib.Path(askdirectory())
     if pathname is not None:
         state["outdir"] = pathname
         value_outdir.set(pathname)
