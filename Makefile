@@ -1,6 +1,9 @@
 .PHONY: tests
 .DEFAULT_GOAL := run
 
+archive:
+	tar cf fungani.tgz fungani/* requirements.txt pyproject.toml
+
 check:
 	ruff check fungani
 

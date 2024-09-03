@@ -1,3 +1,3 @@
-fastaparser==1.1.1 ; python_full_version >= "3.9.0" and python_full_version < "4.0.0" \
-    --hash=sha256:55adcc43285cac07a39844de2bbc5a0b9a40eb35fa99a44b62abe19917cd778e \
-    --hash=sha256:c929f712bd4ea3e6f3569761c6c4fbe798e9a1c4b04d322deb05c8922e731cd4
+fqfa==1.3.1 ; python_full_version >= "3.9.0" and python_full_version < "4.0.0" \
+    --hash=sha256:4624d4595cbefa0c3c0308c307bb123d621837e53768370ba48db5c20dc03cc9 \
+    --hash=sha256:9a043ad4cdfbd3466dc4660a525f7e68bff968686fc83f2461911229c483346b
