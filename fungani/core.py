@@ -180,11 +180,11 @@ def main(args):
         args.cpus = multiprocessing.cpu_count() - 1
         logger.warn(f"No. cores too large, now {args.cpus}")
 
-    if 0 < args.threshold <= 1:
+    if 0 < args.threshold < 1:
         args.threshold *= 100
         logger.warn(f"ANI threshold < 1, now {args.threshold}")
 
-    if 0 < args.percent <= 1:
+    if 0 < args.percent < 1:
         args.percent *= 100
         logger.warn(f"Genome sampling < 1, now {args.percent}")
 

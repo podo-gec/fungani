@@ -16,7 +16,7 @@ strain_test <- "B"
 
 d1 <- read.csv(file_fwd, header = FALSE)
 nsample <- nrow(d1)
-dd <- subset(d1, d1$V2 > threshold / 100)
+dd <- subset(d1, d1$V2 >= threshold / 100)
 NI <- cut(dd$V2,
   breaks = c(
     0.8, 0.85, 0.9, 0.95, 0.96,
@@ -79,7 +79,7 @@ p1 <- p1_base + scale_y_reverse()
 if (length(args) > 3) {
   d2 <- read.csv(file_rev, header = FALSE)
   nsample <- nrow(d2)
-  dd <- subset(d2, d2$V2 > threshold / 100)
+  dd <- subset(d2, d2$V2 >= threshold / 100)
   NI <- cut(dd$V2,
     breaks = c(
       0.8, 0.85, 0.9, 0.95, 0.96, 0.97,
