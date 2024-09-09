@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := run
 
 archive:
-	tar cf fungani.tgz fungani/* requirements.txt pyproject.toml
+	tar cf fungani.tgz fungani/* poetry.lock requirements.txt pyproject.toml
 
 check:
 	ruff check fungani
