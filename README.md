@@ -19,11 +19,8 @@ installed separately.
 - [R ≥ 4.0] (optional)
 
 Standalone Blast programs can be installed on all platforms from the NCBI
-website, or with [conda] on Linux and macOS systems.
-
-To use the R backend, please ensure that the [ggplot2] and [patchwork] packages
-are installed system-wide. Alternatively, you could use [renv] or [conda] to
-manage a shared virtual environment for both programs.
+website, or with [conda] on Linux and macOS systems. See below for detailed
+instructions specific to each OS.
 
 For development, Python packages are managed using [Poetry]. External packages
 will be installed automatically in a virtual environment when building the
@@ -45,24 +42,32 @@ installed using Poetry or pip install.
 
 **Binary standalone is currently under development.**
 
-1. Download [Python 3.12]. Be sure to check the "Add python.exe to PATH".
+1. Download and install [Python 3.12]. Be sure to check the "Add python.exe to
+   PATH" at the bottom of the installer window.
 
 ![py](https://github.com/podo-gec/fungani/blob/master/assets/img-python.jpg)
 
-2. Download [Blast+ 2.16]. Binaries should be added automatically to the PATH.
-3. Download [R 4.4.1]. You will need to add the binary to the PATH yourself.
-   Open your file explorer, right click on the "C:\" folder and select
-   "Properties". Look for environment variables. Update the "Path" variable and
-   click "Modify". Add the path to R binaries (e.g., "C:\Program
+2. Download and install [Blast+ 2.16]. Binaries should be added automatically
+   to the PATH.
+3. Download and install [R 4.4.1]. You will need to add the binary to the PATH
+   yourself. Open your file explorer, right click on the "C:\" folder and
+   select "Properties". Look for environment variables. Update the "Path" variable
+   and click "Modify". Add the path to R binaries (e.g., "C:\Program
    Files\R\R-4.4.1\bin"), and click OK.
 
 ![path](https://github.com/podo-gec/fungani/blob/master/assets/img-path.jpg)
 
 ![r](https://github.com/podo-gec/fungani/blob/master/assets/img-r.jpg)
 
-4. Download an archive of the application, [fungani.zip]. Decompress the archive
-   anywhere on your hard drive. There is BAT script in this folder that can be
-   used to launch the application automatically.
+4. Download an archive of the application, [fungani.zip]. If the file is not
+   downloaded automatically, click on the Download button (see below).
+   Decompress the archive anywhere on your hard drive. There is BAT script in this
+   folder that can be used to launch the application automatically. Before
+   launching the script, create a temporary directory anywhere on your system in
+   order to store intermediate results. Once the application is running, select
+   this temporary directory for the "Output directory".
+
+![raw](https://github.com/podo-gec/fungani/blob/master/assets/2024-09-10-11-00-32.png)
 
 [Python 3.12]: https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe
 [Blast+ 2.16]: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-win64.exe
@@ -75,13 +80,13 @@ installed using Poetry or pip install.
 
 Python should already be available on your system.
 
-1. Download [Blast+ 2.16]. Choose the version that fit your OS specs (Intel or
-   ARM). Binaries should be added automatically to the PATH.
-2. Download [R 4.4.1]. Choose the version that fit your OS specs (Intel or ARM).
-   Binaries should be added automatically to the PATH.
-3. Download an archive of the application, [fungani.zip]. Decompress the archive
-   anywhere on your hard drive. There is a COMMAND script in this folder that
-   can be used to launch the application automatically.
+1. Download and install [Blast+ 2.16]. Choose the version that fit your OS
+   specs (Intel or ARM). Binaries should be added automatically to the PATH.
+2. Download and install [R 4.4.1]. Choose the version that fit your OS specs
+   (Intel or ARM). Binaries should be added automatically to the PATH.
+3. Download an archive of the application, [fungani.zip]. Decompress the
+   archive anywhere on your hard drive. There is a COMMAND script in this
+   folder that can be used to launch the application automatically.
 
 [Blast+ 2.16]: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 [R 4.4.1]: https://cloud.r-project.org/bin/macosx/

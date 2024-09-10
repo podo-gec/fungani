@@ -1,8 +1,12 @@
-library(ggplot2)
-library(patchwork)
+packages <- c("ggplot2", "patchwork")
+packages <- lapply(packages, FUN = function(x) {
+  if (!require(x, character.only = TRUE)) {
+    install.packages(x)
+    library(x, character.only = TRUE)
+  }
+})
 
 args <- commandArgs(trailingOnly = TRUE)
-# TODO: check that on Windows this points to the same directory as Python
 homedir <- path.expand("~")
 outfile <- file.path(homedir, "fungani.pdf")
 genosize <- as.numeric(args[1])
