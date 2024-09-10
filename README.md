@@ -25,10 +25,10 @@ To use the R backend, please ensure that the [ggplot2] and [patchwork] packages
 are installed system-wide. Alternatively, you could use [renv] or [conda] to
 manage a shared virtual environment for both programs.
 
-Python packages are managed using [Poetry]. External packages will be installed
-automatically in a virtual environment when building the project. Currently,
-the only external dependency is [fqfa], which should be installed using
-Poetry or pip install.
+For development, Python packages are managed using [Poetry]. External packages
+will be installed automatically in a virtual environment when building the
+project. Currently, the only external dependency is [fqfa], which should be
+installed using Poetry or pip install.
 
 [Python ≥ 3.9]: https://www.python.org/
 [BLAST+ executables]: https://blast.ncbi.nlm.nih.gov/doc/blast-help/
@@ -41,11 +41,76 @@ Poetry or pip install.
 [Poetry]: https://python-poetry.org/
 [fqfa]: https://pypi.org/project/fqfa/
 
-### Installing
+### Installation on Windows
 
-FungANI may be available on [PyPI](https://pypi.org/) in the future. In the
-meantime, this package can be installed from from source by cloning the
-repository from GitHub:
+**Binary standalone is currently under development.**
+
+1. Download [Python 3.12]. Be sure to check the "Add python.exe to PATH".
+
+![py](https://github.com/podo-gec/fungani/blob/master/assets/img-python.jpg)
+
+2. Download [Blast+ 2.16]. Binaries should be added automatically to the PATH.
+3. Download [R 4.4.1]. You will need to add the binary to the PATH yourself.
+   Open your file explorer, right click on the "C:\" folder and select
+   "Properties". Look for environment variables. Update the "Path" variable and
+   click "Modify". Add the path to R binaries (e.g., "C:\Program
+   Files\R\R-4.4.1\bin"), and click OK.
+
+![path](https://github.com/podo-gec/fungani/blob/master/assets/img-path.jpg)
+
+![r](https://github.com/podo-gec/fungani/blob/master/assets/img-r.jpg)
+
+4. Download an archive of the application, [fungani.zip]. Decompress the archive
+   anywhere on your hard drive. There is BAT script in this folder that can be
+   used to launch the application automatically.
+
+[Python 3.12]: https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe
+[Blast+ 2.16]: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-win64.exe
+[R 4.4.1]: https://cloud.r-project.org/bin/windows/base/R-4.4.1-win.exe
+[fungani.zip]: https://github.com/podo-gec/fungani/blob/master/dist/fungani.zip
+
+### Installation on macOS
+
+**Binary standalone is currently under development.**
+
+Python should already be available on your system.
+
+1. Download [Blast+ 2.16]. Choose the version that fit your OS specs (Intel or
+   ARM). Binaries should be added automatically to the PATH.
+2. Download [R 4.4.1]. Choose the version that fit your OS specs (Intel or ARM).
+   Binaries should be added automatically to the PATH.
+3. Download an archive of the application, [fungani.zip]. Decompress the archive
+   anywhere on your hard drive. There is a COMMAND script in this folder that
+   can be used to launch the application automatically.
+
+[Blast+ 2.16]: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+[R 4.4.1]: https://cloud.r-project.org/bin/macosx/
+[fungani.zip]: https://github.com/podo-gec/fungani/blob/master/dist/fungani.zip
+
+### Installation on Linux (Ubuntu)
+
+A binary for Ubuntu 24.04 LTS is available in the [dist] folder of this
+repository.
+
+Python should already be available on your system.
+
+1. Download [Blast+ 2.16]. Choose the version that fit your OS specs (Intel or
+   ARM). Binaries should be added automatically to the PATH.
+2. Download [R 4.4.1]. Choose the version that fit your OS specs (Intel or ARM).
+   Binaries should be added automatically to the PATH. You can also use your
+   package panager, e.g. `sudo apt install r-base`.
+3. Download an archive of the application, [fungani.zip]. Decompress the archive
+   anywhere on your hard drive. There is a SHELL script in this folder that
+   can be used to launch the application automatically.
+
+[dist]: https://github.com/podo-gec/fungani/blob/master/dist/linux/fungani
+[Blast+ 2.16]: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+[R 4.4.1]: https://cloud.r-project.org/bin/linux/ubuntu/
+[fungani.zip]: https://github.com/podo-gec/fungani/blob/master/dist/fungani.zip
+
+### Running the command-line application
+
+Clone the repository from GitHub:
 
     git clone https://github.com/podo-gec/fungani.git
 
@@ -66,8 +131,6 @@ corresponding command, anytime at your terminal prompt, when you are done. The
 next time, you will only need to activate the virtual environment.
 
 [prerequisites]: #prerequisites
-
-### Running the command-line application
 
 Assuming you are at the root of the project and the virtual environment is
 activated, simply run:
