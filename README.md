@@ -32,7 +32,7 @@ installed using Poetry or pip install.
 [R ≥ 4.0]: https://cran.r-project.org/
 [conda]: https://docs.conda.io/en/latest/
 [ggplot2]: https://ggplot2.tidyverse.org/
-[patchwaork]: https://patchwork.data-imaginist.com/index.html
+[patchwork]: https://patchwork.data-imaginist.com/index.html
 [renv]: https://rstudio.github.io/renv/index.html
 [conda]: https://www.anaconda.com/download/
 [Poetry]: https://python-poetry.org/
@@ -50,9 +50,10 @@ installed using Poetry or pip install.
 2. Download and install [Blast+ 2.16]. Binaries should be added automatically
    to the PATH.
 3. Download and install [R 4.4.1]. You will need to add the binary to the PATH
-   yourself. Open your file explorer, right click on the "C:\" folder and
-   select "Properties". Look for environment variables. Update the "Path" variable
-   and click "Modify". Add the path to R binaries (e.g., "C:\Program
+   yourself.  To configure your environment variables, click the Start button,
+   then type "environment properties" into the search bar and hit Enter. In the
+   System Properties window, click "Environment Variables." Update the "Path"
+   variable and click "Modify". Add the path to R binaries (e.g., "C:\Program
    Files\R\R-4.4.1\bin"), and click OK.
 
 ![path](https://github.com/podo-gec/fungani/blob/master/assets/img-path.jpg)
@@ -68,6 +69,18 @@ installed using Poetry or pip install.
    this temporary directory for the "Output directory".
 
 ![raw](https://github.com/podo-gec/fungani/blob/master/assets/2024-09-10-11-00-32.png)
+
+On the first launch, the program will try to install dependencies for Python
+(package [fqfa]) and R (packages [ggplot2] and [patchwork]). The latter may
+pose problem with user rights as it depends on a user-local library. If that is
+the case (no graphic display produced when the program finished), please
+consider installing the packages manually. To do so, launch R and issue the
+following command at the R prompt:
+
+    install.packages(c("ggplot2", "patchwork"))
+
+As a final note, genome filenames should not contain space or special
+characters forbidden by the OS, e.g. `\`.
 
 [Python 3.12]: https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe
 [Blast+ 2.16]: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-win64.exe
