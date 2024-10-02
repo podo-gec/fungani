@@ -124,7 +124,7 @@ edit_size = ttk.Entry(
 value_size.set(1000)
 edit_size.grid(row=4, column=1)
 
-label_overlap = ttk.Label(app, text="Window overlap (bp)", anchor="e", width=20)
+label_overlap = ttk.Label(app, text="Step size (bp)", anchor="e", width=20)
 label_overlap.grid(row=5, column=0, pady=10)
 value_overlap = tk.IntVar()
 edit_overlap = ttk.Entry(

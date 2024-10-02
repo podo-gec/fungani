@@ -36,7 +36,7 @@ def parse_args(args):
         "-w", "--size", dest="size", type=int, default=1000, help="Window size"
     )
     parser.add_argument(
-        "-g", "--overlap", dest="overlap", type=int, default=500, help="Window overlap"
+        "-g", "--overlap", dest="overlap", type=int, default=500, help="Step size"
     )
     parser.add_argument(
         "-j", "--cpus", dest="cpus", type=int, default=4, help="Number of CPU cores"
