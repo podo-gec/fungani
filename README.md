@@ -5,7 +5,7 @@ two fungal genomes, enables easy fungal species delimitation.
 
 ## Getting Started
 
-These instructions will give you a copy of the project up and running on
+These instructions will help you set up a working copy of the project on
 your local machine for development and testing purposes. See deployment
 for notes on deploying the project on a live system.
 
@@ -22,18 +22,15 @@ Standalone Blast programs can be installed on all platforms from the NCBI
 website, or with [conda] on Linux and macOS systems. See below for detailed
 instructions specific to each OS.
 
-For development, Python packages are managed using [Poetry]. External packages
-will be installed automatically in a virtual environment when building the
-project. Currently, the only external dependency is [fqfa], which should be
-installed using Poetry or pip install.
+For development, package management and unit testing are managed using
+[Poetry], but it is not mandatory. External packages will be installed
+automatically in a virtual environment when building the project. Currently,
+the only external dependency is [fqfa], which should be installed using Poetry
+or pip install.
 
 [Python ≥ 3.9]: https://www.python.org/
 [BLAST+ executables]: https://blast.ncbi.nlm.nih.gov/doc/blast-help/
 [R ≥ 4.0]: https://cran.r-project.org/
-[conda]: https://docs.conda.io/en/latest/
-[ggplot2]: https://ggplot2.tidyverse.org/
-[patchwork]: https://patchwork.data-imaginist.com/index.html
-[renv]: https://rstudio.github.io/renv/index.html
 [conda]: https://www.anaconda.com/download/
 [Poetry]: https://python-poetry.org/
 [fqfa]: https://pypi.org/project/fqfa/
@@ -86,6 +83,9 @@ characters forbidden by the OS, e.g. `\`.
 [Blast+ 2.16]: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-win64.exe
 [R 4.4.1]: https://cloud.r-project.org/bin/windows/base/R-4.4.1-win.exe
 [fungani.zip]: https://github.com/podo-gec/fungani/blob/master/dist/fungani.zip
+[ggplot2]: https://ggplot2.tidyverse.org/
+[patchwork]: https://patchwork.data-imaginist.com/index.html
+
 
 ### Installation on macOS
 
@@ -110,6 +110,7 @@ Python should already be available on your system.
 A binary for Ubuntu 24.04 LTS is available in the [dist] folder of this
 repository.
 
+As an alternative, consider using the shell script included in this repository.
 Python should already be available on your system.
 
 1. Download [Blast+ 2.16]. Choose the version that fit your OS specs (Intel or
@@ -183,18 +184,18 @@ To run the program on a REFERENCE and TEST genome, use the following command:
 In the above example, `REFERENCE` and `TEST` denote the path to the Fasta file
 for the reference and test genomes. All other parameters are optional and can
 safely be omitted but you can change ANI threshold (`-t` or `--threshold`),
-genome fraction (`-p` or `--percent`), window size (`-w` or `--window`), overlap
-(`-g` or `--overlap`), number of cores (`-j` or `--cpus`), direction (`-u` or
-`--onepass`), cleaning of intermediate results (̀`c` or `--clean`), and output
-directory (`-o` or `--output`) to store intermediate results. All intermediate
-results are cleaned up when the application has finished its job.
+genome fraction (`-p` or `--percent`), window size (`-w` or `--window`),
+overlap (`-g` or `--overlap`), number of cores (`-j` or `--cpus`), direction
+(`-u` or `--onepass`), cleaning of intermediate results (̀`-c` or `--clean`),
+and output directory (`-o` or `--output`) to store intermediate results. All
+intermediate results are cleaned up when the application has finished its job.
 
 If everything went fine, three files are written in your user home directory,
 two CSV files that contain the % identity (on a 0-1 scale, i.e. 0.8 means 80%)
 in the forward (`fungani_fwd.csv`) and reverse (`fungani_rev.csv`) direction if
 you didn't activate the `-u` or `--onepass` option. The latter considers the
-`TEST` genome as the `REFERENCE` and all blasts are performed against the `TEST`
-genome itself.
+`TEST` genome as the `REFERENCE` and all blasts are performed against the
+`TEST` genome itself.
 
 Optionally, if R is installed on your OS, a graphical representation of the ANI
 distribution will be generated along raw results in your home user directory.
@@ -262,27 +263,13 @@ Quick mode analysis (10% genome, `-p 10`):
 | Intel Xeon Gold 6240R (96) @ 4.000GHz | Ubuntu 22.04.4 LTS | 20        | 00:01:05        |
 | Intel Xeon Gold 6240R (96) @ 4.000GHz | Ubuntu 22.04.4 LTS | 40        | 00:00:41        |
 
-Results from a [sample session] (whole genome and 10% sampling) are available.
+Results from a [sample session] (whole genome and 10% sampling) are also available.
 
 [bedtools]: https://bedtools.readthedocs.io/en/latest/index.html
 [biopython]: https://biopython.org/
 [numpy]: https://numpy.org/
 [plotnine]: https://plotnine.org/
 [sample session]: https://github.com/podo-gec/fungani/blob/master/assets/sample_results
-
-## Running the tests (dev-only)
-
-There is a small test suite available in the tests directory. To run all the
-tests, use pytest as follows:
-
-    python -m pytest tests/
-
-Alternatively, if you are using Poetry, since pytest is installed as a dev
-dependency, you can simply run:
-
-    poetry run pytest
-
-Note that tests can be launched individually.
 
 ## Contributing
 
